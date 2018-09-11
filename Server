@@ -1,0 +1,47 @@
+@AyushJain
+
+/*
+* Keystore initialisation in the Java code for importing certificates from the keystore.
+* For variable cert enter the path of the keystore.
+* Replace "Password_Keystore" with actual password of the keystore. 
+*/
+
+KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509","SunJSSE");
+KeyStore ks;
+		try {
+			ks = KeyStore.getInstance("JKS");
+			File cert = new File("C:\\certs\\KeystoreC.jks");
+	      		InputStream stream = new FileInputStream(cert);
+	      		ks.load(stream, "Password_Keystore".toCharArray());
+	      		stream.close();
+	      		kmf.init(ks,"jaguar".toCharArray());
+		     } catch (KeyStoreException | CertificateException | UnrecoverableKeyException e) {
+		e.printStackTrace();
+	}
+  
+/*
+* Truststore initialisation in the Java code for importing trusted certificates for authentication.
+* For variable trustcert enter the path of the truststore.
+* Replace "Password_Truststore" with actual password of the truststore. 
+*/  
+  
+TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+KeyStore trustks;
+		try {
+		trustks = KeyStore.getInstance("JKS");
+		File trustcert = new File("C:\\certs\\myTrustore");
+		      InputStream truststream = new FileInputStream(trustcert);
+	      	trustks.load(truststream, "Password_Truststore".toCharArray());
+	      	truststream.close();
+	      	tmf.init(trustks);
+		} catch (KeyStoreException | CertificateException e) {
+		e.printStackTrace();
+	}
+ 
+
+ SSLContext context = SSLContext.getInstance("TLSv1.2");
+ context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+ SSLServerSocketFactory sslServerSocketfactory = (SSLServerSocketFactory)SSLServerSocketFactory.getDefault();
+ SSLServerSocket server = (SSLServerSocket)sslServerSocketfactory.createServerSocket(port);
+ server.setEnabledCipherSuites(server.getSupportedCipherSuites());
+ SSLSocket connection = (SSLSocket)server.accept();
