@@ -1,0 +1,45 @@
+@AyushJain
+
+
+/*
+* Change path of the keystore as required.
+* Replace Password_Keystore with actaul password of the keystore.
+*/
+
+KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509","SunJSSE");
+KeyStore ks;
+	try {
+			ks = KeyStore.getInstance("JKS");
+			File cert = new File("C:\\certs\\KeystoreC.jks");
+		      InputStream stream = new FileInputStream(cert);
+		      ks.load(stream, "Password_Keystore".toCharArray());
+		      stream.close();
+		      kmf.init(ks,"jaguar".toCharArray());
+		} catch (KeyStoreException | CertificateException | UnrecoverableKeyException | IOException e) {
+			e.printStackTrace();
+	}
+	
+/*
+* Change path of the truststore as required.
+* Replace Password_Truststore with actaul password of the Truststore.
+*/
+
+TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+KeyStore trustks;
+		try {
+			trustks = KeyStore.getInstance("JKS");
+			File trustcert = new File("C:\\certs\\myTrustore");
+		      InputStream truststream = new FileInputStream(trustcert);
+		      trustks.load(truststream, "Password_Truststore".toCharArray());
+		      truststream.close();
+		      tmf.init(trustks);
+		} catch (KeyStoreException | CertificateException | IOException e) {
+			
+			e.printStackTrace();
+		}
+
+	SSLContext context = SSLContext.getInstance("TLSv1.2");
+	context.init(kmf.getKeyManagers(), tmf.getTrustManagers(), new SecureRandom());
+	SSLSocketFactory sslsocketfactory = (SSLSocketFactory)SSLSocketFactory.getDefault();
+	SSLSocket connection = (SSLSocket)sslsocketfactory.createSocket(host,port);
+  connection.setEnabledCipherSuites(connection.getSupportedCipherSuites());
